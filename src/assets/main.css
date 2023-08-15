@@ -1,0 +1,36 @@
+@import './base.css';
+
+.screen {
+	background: #303841;
+	color: white;
+	font-size: 1.2rem;
+	width: 100vw;
+	height: 100svh;
+	display: flex;
+	flex-direction: column;
+}
+
+.screen .screen-title {
+	padding: 0.8rem;
+	text-align: center;
+}
+
+input, select {
+  font-size: 1.2rem;
+  border: none;
+  border-bottom: 2px solid white;
+  background: #303841;
+  outline: none;
+  color: white;
+}
+
+.button {
+	--size: 3rem;
+	background: #171a1a;
+	width: var(--size);
+	height: var(--size);
+	border-radius: var(--size);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
