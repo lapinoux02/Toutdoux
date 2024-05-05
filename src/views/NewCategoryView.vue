@@ -2,19 +2,17 @@
 <div id="new-category-view">
 	<div class="screen-title">Nouvelle catégorie</div>
 		<div class="new-category-form">
-		<input class="category-input new-category-input" placeholder="Catégorie" v-model="newCategory.name">
-		<input type="color" v-model="newCategory.color">
-		<div class="material-symbols-outlined validate" :class="{valid: formValid}" @click="validate">done</div>
+		<div class="form-line"><span class="material-symbols-outlined">sell</span><input class="category-input new-category-input" placeholder="Catégorie" v-model="newCategory.name"></div>
+		<div class="form-line"><span class="material-symbols-outlined">palette</span><input type="color" v-model="newCategory.color"></div>
+		<div class="material-symbols-outlined validate-button" :class="{valid: formValid}" @click="validate">done</div>
 	</div>
 </div>
 </template>
 <script>
 import { store } from '@/store/store.js'
+import ChoiceButton from '@/components/ChoiceButton.vue'
 
 export default {
-	beforeRouteEnter(to, from, next) {
-	  next(vm => vm.prevRoute = from)
-	},
 	data() {
 		return {
 			newCategory: {
@@ -34,13 +32,14 @@ export default {
 			if (!this.formValid) return
 
 			store.addCategory(this.newCategory)
-			// store.categories.push(this.newCategory)
-			if (this.prevRoute) {
-				this.$router.push(this.prevRoute)
-			} else {
-				this.$router.push({name: 'newTask'})
-			}
+			this.$router.push({name: 'newTask'})
+		},
+		cancel() {
+			this.$router.push({name: 'newTask'})
 		}
+	},
+	components: {
+		ChoiceButton
 	}
 }
 </script>
@@ -50,22 +49,5 @@ export default {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
-}
-.new-category-form .validate {
-	align-self: center;
-	width: 3rem;
-	height: 3rem;
-	border-radius: 3rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border: 1px solid grey;
-	background: transparent;
-	color: grey;
-}
-.new-category-form .validate.valid {
-	background: black;
-	border: 1px solid white;
-	color: white;
 }
 </style>

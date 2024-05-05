@@ -2,32 +2,30 @@
 <div id="add-task-view">
 	<div class="screen-title">Nouvelle tache</div>
 	<div class="add-task-form">
-		<input class="task-input" placeholder="Tache" v-model="newTask.task">
-		<div style="display: flex; justify-content: stretch; gap: 0.5rem;">
+		<div class="form-line"><span class="material-symbols-outlined">task</span><input class="task-input" placeholder="Tache" v-model="newTask.task"></div>
+		<div class="form-line">
+			<div class="material-symbols-outlined">sell</div>
 			<select value="" class="category-select" v-model="newTask.categoryId">
-	    	<option value="">Aucune catégory</option>
+	    	<option value="">Aucune catégorie</option>
 				<option v-for="category in categories" :value="category.id">{{category.name}}</option>
 			</select>
-			<div class="material-symbols-outlined" @click="$router.push({name: 'newCategory'})">add</div>
 		</div>
-		<div style="display: flex; align-items: center; gap: 1rem;">Récurrent: <div class="material-symbols-outlined" @click="newTask.recurrent ^= 1">{{newTask.recurrent ? 'check_box' : 'check_box_outline_blank'}}</div></div>
-		<input v-if="!newTask.recurrent" type="date" class="date-input" v-model="newTask.date">
+		<div class="form-line"><span class="material-symbols-outlined">event_repeat</span><toggle v-model="newTask.recurrent"></toggle></div>
+		<div v-if="!newTask.recurrent" class="form-line"><span class="material-symbols-outlined">event</span><input type="date" class="date-input" v-model="newTask.date"></div>
 		<div v-else class="recurence">
 			<div v-for="day in days" @click="day.selected ^= 1" class="day" :class="{selected: day.selected}">{{day.name}}</div>
 		</div>
-		<div class="material-symbols-outlined validate" :class="{valid: formValid}" @click="validate">done</div>
+		<div class="material-symbols-outlined validate-button" :class="{valid: formValid}" @click="validate">done</div>
 	</div>
 </div>
 </template>
 <script>
 import { store } from '@/store/store.js'
+import Toggle from '@/components/Toggle.vue'
+import Multiselect from '@/components/Multiselect.vue'
 
 export default {
-	beforeRouteEnter(to, from, next) {
-	  next(vm => vm.prevRoute = from)
-	},
 	data() {
-		console.log(this.$router)
 		return {
 			categories: store.categories,
 			days: [
@@ -40,11 +38,13 @@ export default {
 				{id: 0, name: 'D', selected: false}
 			],
 			newTask: {
+				id: new Date().getTime(),
 				task: undefined,
 				categoryId: "",
 				date: undefined,
 				recurrent: false
-			}
+			},
+			test: undefined
 		}
 	},
 	computed: {
@@ -57,12 +57,12 @@ export default {
 			if (!this.formValid) return
 			store.addTask({...this.newTask, days: this.days.filter(e => e.selected).map(e => e.id)})
 			
-			if (this.prevRoute) {
-				this.$router.push(this.prevRoute)
-			} else {
-				this.$router.push({name: 'backlog'})
-			}
+			this.$router.push({name: 'backlog'})
 		}
+	},
+	components: {
+		Toggle,
+		Multiselect
 	}
 }
 </script>
@@ -71,10 +71,7 @@ export default {
 	margin: 0 1rem;
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
-}
-.add-task-form .category-select {
-	flex-grow: 1;
+	gap: 2rem;
 }
 .add-task-form .recurence {
 	display: flex;
@@ -87,33 +84,16 @@ export default {
 	justify-content: center;
 	align-items: center;
 	border-radius: 1.5rem;
-	border: 1px solid white;
-	color: white;
+	border: 1px solid var(--text-color);
+	color: var(--text-color);
 	font-size: 0.8rem;
 }
 .add-task-form .date-input {
 	width: 100%;
 }
 .add-task-form .recurence .day.selected {
-	border: 1px solid white;
-	background: white;
-	color: black;
-}
-.add-task-form .validate {
-	align-self: center;
-	width: 3rem;
-	height: 3rem;
-	border-radius: 3rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border: 1px solid grey;
-	background: transparent;
-	color: grey;
-}
-.add-task-form .validate.valid {
-	background: black;
-	border: 1px solid white;
-	color: white;
+	border: 1px solid var(--text-color);
+	background: var(--text-color);
+	color: var(--bg-dark);
 }
 </style>

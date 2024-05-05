@@ -1,43 +1,31 @@
 import { reactive } from 'vue'
-import { format } from 'date-fns'
+import { SimpleTask, RepeatingTask, WeeklyTask, MonthlyTask, MonthlyWeekDayTask } from '@/models/Task.js'
 
 export const store = reactive({
   categories: [],
   tasks: [],
-/*  categories: [{
-    name: 'Garage',
-    color: '#f5428a',
-    id: 3
-  }, {
-    name: 'Maison',
-    color: '#eb9b34',
-    id: 1
-  }, {
-    name: 'Bien-être',
-    color: '#56d65a',
-    id: 2
-  }],
-  tasks: [
-    {task: 'vaisselle', id: 0, categoryId: 1, date: format(new Date(), 'yyyy-MM-dd')},
-    {task: 'arroser les plantes', id: 1, categoryId: 1, date: format(new Date(), 'yyyy-MM-dd')},
-    {task: 'yoga', id: 2, categoryId: 2, date: format(new Date(), 'yyyy-MM-dd')},
-    {task: 'révision voiture', id: 3, categoryId: 3},
-    {task: 'vendre cartons', id: 4, categoryId: 3},
-    {task: 'préparer risoto', id: 5, categoryId: 1},
-    {task: 'poster faire-parts', id: 6, date: format(new Date(), 'yyyy-MM-dd')},
-    {task: 'sortir poubelles', id: 7}
-  ],*/
+  getTask(taskId) {
+    return this.tasks.find(task => task.id === taskId)
+  },
   addTask(task) {
     this.tasks.push(task)
     this.save()
   },
+  removeTask(taskId) {
+    this.tasks.splice(this.tasks.findIndex(task => task.id == taskId), 1)
+    this.save()
+  },
   modifyTask(taskId, newTask) {
-    this.tasks.splice(this.tasks.findIndex(task => task.id === taskId), 1, newTask)
+    this.tasks.splice(this.tasks.findIndex(task => task.id == taskId), 1, newTask)
     this.save()
   },
   addCategory(category) {
     this.categories.push(category)
     this.save()
+  },
+  scheduleItem(taskId, date) {
+     this.tasks.find(task => task.id == taskId).date = date
+     this.save()
   },
   save() {
     localStorage.setItem('todo', JSON.stringify({categories: this.categories, tasks: this.tasks}))
@@ -47,6 +35,29 @@ export const store = reactive({
     if (!storage) return
 
     this.categories = storage.categories
-    this.tasks = storage.tasks
+    // this.tasks = storage.tasks
+    storage.tasks.forEach(task => {
+      switch(task.taskType) {
+        case 0:
+          var newTask = new SimpleTask(task)
+          break
+        case 1:
+          newTask = new WeeklyTask(task)
+          break
+        case 2:
+          newTask = new RepeatingTask(task)
+          break
+        case 3:
+          switch(task.monthType) {
+          case 0:
+            newTask = new MonthlyTask(task)
+            break
+          case 1:
+            newTask = new MonthlyWeekDayTask(task)
+            break
+          }
+      }
+      this.tasks.push(newTask)
+    })
   }
 })

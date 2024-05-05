@@ -24,7 +24,6 @@
     >
       <div draggable="false" class="task-name">{{item.task}}</div>
     </div>
-    <div class="material-symbols-outlined button" @click="$router.push({name: 'newTask'})">add</div>
   </div>
   <div class="days">
   	<div v-for="day in days"
@@ -33,18 +32,14 @@
   		dropable="true"
   		@dragover.prevent
   		@drop="scheduleItem(day)"
+      @click="$router.push({name: 'home'})"
   	>{{day.name}}</div>
   </div>
-  <overlay>
-    <template #bottom-left><div class="material-symbols-outlined" @click="$router.push({name: 'home'})">list</div></template>
-  </overlay>
-  <notification :notification="notification"></notification>
 </div>
 </template>
 <script>
-import Overlay from '@/components/Overlay.vue'
-import Notification from '@/components/Notification.vue'
 import { store } from '@/store/store.js'
+import { notificationStore } from '@/store/notificationStore.js'
 import { addDays, format } from 'date-fns'
 
 export default {
@@ -65,8 +60,7 @@ export default {
       }, {
       	date: addDays(new Date(), 3),
       	name: format(addDays(new Date(), 3), 'dd/MM')
-      }],
-      notification: undefined
+      }]
 		}
 	},
   computed: {
@@ -83,7 +77,7 @@ export default {
   },
   methods: {
   	itemColor(item) {
-  		return this.categories.find(cat => cat.id === item.categoryId)?.color || 'white'
+  		return this.categories.find(cat => cat.id === item.categoryId)?.color || 'var(--text-color)'
   	},
     startDrag(item) {
       this.draggedItem = item
@@ -104,23 +98,16 @@ export default {
       }
     },
     scheduleItem(day) {
-    	this.draggedItem.date = day.date
+      store.scheduleItem(this.draggedItem.id, day.date)
     	let item = this.draggedItem
-    	this.notification = {
+    	notificationStore.notification = {
     		item,
         action: `prévu pour ${day.name}`,
     		undo: () => {
     			item.date = undefined
-    			clearTimeout(timeout)
-    			this.notification = undefined
     		}
     	}
-    	var timeout = setTimeout(() => this.notification = undefined, 5000)
     }
-  },
-  components: {
-  	Overlay,
-    Notification
   }
 }
 </script>
@@ -177,7 +164,7 @@ export default {
 }
 
 .days {
-  border-top: 5px solid #343434;
+  border-top: 5px solid var(--bg-dark);
   height: 15rem;
   width: 100vw;
   display: flex;
@@ -194,25 +181,5 @@ export default {
 	align-items: center;
 	background: #7a7476;
 	border-radius: 0.5rem;
-}
-.notification-holder {
-	position: fixed;
-	margin: auto;
-	bottom: 0.5rem;
-	width: 100vw;
-	display: flex;
-	justify-content: center;
-	z-index: 11;
-}
-.notification-holder .notification {
-	display: flex;
-	background: black;
-	border-radius: 5rem;
-	font-size: 0.7rem;
-	padding: 0.2rem 0.6rem;
-	gap: 0.8rem;
-}
-.notification-holder .notification .undo {
-	color: #e3e304;
 }
 </style>

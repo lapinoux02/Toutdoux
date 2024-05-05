@@ -1,36 +1,51 @@
 @import './base.css';
 
 .screen {
-	background: #303841;
-	color: white;
+	background: var(--bg-light);
+	color: var(--text-color);
 	font-size: 1.2rem;
 	width: 100vw;
-	height: 100svh;
+	height: 100dvh;
 	display: flex;
 	flex-direction: column;
-}
-
-.screen .screen-title {
-	padding: 0.8rem;
-	text-align: center;
+	.screen-title {
+		padding: 0.8rem;
+		text-align: center;
+		background: var(--bg-dark);
+		margin-bottom: 1rem;
+	}
 }
 
 input, select {
   font-size: 1.2rem;
   border: none;
-  border-bottom: 2px solid white;
-  background: #303841;
+  border-bottom: 2px solid var(--text-color);
+  background: var(--bg-light);
   outline: none;
-  color: white;
+  color: var(--text-color);
 }
 
-.button {
-	--size: 3rem;
-	background: #171a1a;
-	width: var(--size);
-	height: var(--size);
-	border-radius: var(--size);
+.validate-button {
+	align-self: center;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 3rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	border: 1px solid grey;
+	background: transparent;
+	color: grey;
+}
+
+.validate-button.valid {
+	background: var(--text-color);
+	border: 1px solid var(--text-color);
+	color: var(--bg-dark);
+}
+
+.form-line {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
 }

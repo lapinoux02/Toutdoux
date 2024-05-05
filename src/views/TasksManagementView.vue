@@ -1,8 +1,8 @@
 
 <template>
-  <div id="home-view">
-    <div class="screen-title">{{dayLabel}}</div>
-    <div v-if="taskCategories.length" class="category-list">
+  <div id="task-management-view">
+	  <div class="screen-title">Tasks management</div>
+    <div class="category-list">
       <div
         v-for="category in taskCategories"
         class="category-item"
@@ -16,36 +16,25 @@
         v-for="item in showedItems"
         class="list-item"
         :key="item.id"
-        draggable="true"
-        dropable="true"
-        @dragstart="startDrag(item)"
-        @dragover="dragOver(item)"
-        @dragend="endDrag"
-        :class="{done: item.isDone(day)}"
         :style="{'--color': categories.find(cat => cat.id === item.categoryId)?.color || 'var(--text-color)'}"
       >
         <div style="display: flex; align-items: center; gap: 1rem;">
-          <div class="material-symbols-outlined check-box" @click="checkClick(item)">{{item.isDone(day) ? 'check_box' : 'check_box_outline_blank'}}</div>
+          <span class="material-symbols-outlined">{{ itemSymbol(item) }}</span>
           <div class="task-name" @click="expand(item)">{{item.task}}</div>
         </div>
         <div v-if="expandedItem === item" style="display: flex; justify-content: flex-start; align-items: center; padding-left: calc(24px + 1rem); gap: 1rem;">
           <div class="material-symbols-outlined" @click="remove(item)">close</div>
           <div class="material-symbols-outlined" @click="modify(item)">edit</div>
           <div v-if="!item.recurrent" class="material-symbols-outlined" @click="backlogReturn(item)">undo</div>
-          <div v-if="!isSameDay(new Date(), day) && !item.isDone(day)" class="material-symbols-outlined" @click="report(item)">replay</div>
         </div>
       </div>
     </div>
-    <calendar class="home-view-calendar" v-model="day"></calendar>
   </div>
 </template>
 
 <script>
-import Calendar from '@/components/Calendar.vue'
 import { store } from '@/store/store.js'
 import { notificationStore } from '@/store/notificationStore.js'
-import { isSameDay, subDays, addDays, format } from 'date-fns'
-import { rightLeft } from '@/utils/keyboardEvents.js'
 
 export default {
   data() {
@@ -54,19 +43,12 @@ export default {
       categories: store.categories,
       draggedItem: undefined,
       selectedCategory: undefined,
-      expandedItem: undefined,
-      keyboardEventListener: rightLeft(this.addDay, this.subDay)
+      expandedItem: undefined
     }
   },
   computed: {
-    dayLabel() {
-      let dayLabel = format(this.day, 'dd EEE MM')
-      if (isSameDay(new Date(), this.day)) dayLabel += ' (today)'
-      
-      return dayLabel
-    },
     list() {
-      return store.tasks.filter(task => task.display(this.day))
+      return store.tasks
     },
     showedItems() {
       if (!this.selectedCategory) return this.list
@@ -77,21 +59,13 @@ export default {
     }
   },
   methods: {
-    isSameDay,
-    startDrag(item) {
-      this.draggedItem = item
-    },
-    endDrag() {
-      this.draggedItem = undefined
-    },
-    dragOver(item) {
-      if (item === this.draggedItem) return
-
-      store.tasks.splice(store.tasks.indexOf(item), 0, ...store.tasks.splice(store.tasks.indexOf(this.draggedItem), 1))
-    },
-    checkClick(item) {
-      item.toggleDone(this.day)
-      store.save()
+    itemSymbol(item) {
+      switch(item.taskType) {
+        case 0: return 'event' + (item.report ? 'replay' : '')
+        case 1: return 'date_range' + (item.report ? 'replay' : '')
+        case 2: return 'chronic' + (item.report ? 'replay' : '')
+        case 3: return 'calendar_month' + (item.report ? 'replay' : '')
+      }
     },
     toggleSelectedCategory(category) {
       if (this.selectedCategory === category) {
@@ -152,22 +126,7 @@ export default {
       } else {
         this.expandedItem = item
       }
-    },
-    subDay() {
-      this.day = subDays(this.day, 1)
-    },
-    addDay() {
-      this.day = addDays(this.day, 1)
     }
-  },
-  mounted() {
-    document.addEventListener('keyup', this.keyboardEventListener)
-  },
-  unmounted() {
-    document.removeEventListener('keyup', this.keyboardEventListener)
-  },
-  components: {
-    Calendar
   }
 }
 
@@ -181,7 +140,7 @@ export default {
 #home-view .screen-title {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   width: 100vw;
   padding-left: 5rem;
   padding-right: 5rem;
@@ -191,7 +150,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  padding: 0 1rem 1rem 1rem;
+  padding: 0 0 1rem 1rem;
 }
 .category-list .category-item {
   /* --color variable is defined directly in the element style, in the template */
@@ -222,7 +181,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: calc(100vw - 1rem);
+  width: 80vw;
 }
 .list .list-item .task-name::first-letter {
   text-transform: uppercase;
@@ -230,8 +189,5 @@ export default {
 .list .list-item.done .task-name {
   text-decoration: line-through;
   color: grey;
-}
-.home-view-calendar {
-  flex-shrink: 0;
 }
 </style>

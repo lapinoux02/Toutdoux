@@ -1,26 +1,45 @@
 <template>
   <div v-if="notification" class="notification-holder">
   	<div class="notification">
-  		<div><span :style="{color: itemColor(notification.item)}">{{notification.item.task}}</span> {{notification.action}}</div><div @click="notification.undo()" class="undo">undo</div>
+  		<div><span :style="{color: itemColor(notification.item)}">{{notification.item.task}}</span> {{notification.action}}</div><div @click="undo" class="undo">undo</div>
   	</div>
   </div>
 </template>
 <script>
 import { store } from '@/store/store.js'
+import { notificationStore } from '@/store/notificationStore.js'
 
 export default {
-  props: {
-    notification: null
-  },
 	data() {
 		return {
-      categories: store.categories
+      categories: store.categories,
+			timeout: undefined
+		}
+	},
+	watch: {
+		notification(newNotification) {
+			if (newNotification) {
+				clearTimeout(this.timeout)
+				setTimeout(() => {
+					notificationStore.notification = undefined
+				}, 5000)
+			}
+		}
+	},
+	computed: {
+		notification() {
+			return notificationStore.notification
 		}
 	},
   methods: {
   	itemColor(item) {
-  		return this.categories.find(cat => cat.id === item.categoryId)?.color || 'white'
-  	}
+  		return this.categories.find(cat => cat.id === item.categoryId)?.color || 'var(--text-color)'
+  	},
+		undo() {
+			this.notification.undo()
+			notificationStore.notification = undefined
+			clearTimeout(this.timeout)
+		}
   }
 }
 </script>
@@ -36,7 +55,7 @@ export default {
 }
 .notification-holder .notification {
 	display: flex;
-	background: black;
+	background: var(--bg-darker);
 	border-radius: 5rem;
 	font-size: 0.7rem;
 	padding: 0.2rem 0.6rem;
