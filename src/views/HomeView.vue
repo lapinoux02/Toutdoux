@@ -11,7 +11,7 @@
         @click="toggleSelectedCategory(category)"
       >{{category.name}}</div>
     </div>
-    <div class="list">
+    <div class="list" v-touch:swipe.left="addDay" v-touch:swipe.right="subDay" @click.self="expand(undefined)">
       <div
         v-for="item in showedItems"
         class="list-item"
@@ -21,17 +21,16 @@
         @dragstart="startDrag(item)"
         @dragover="dragOver(item)"
         @dragend="endDrag"
-        :class="{done: item.isDone(day)}"
+        :class="{done: item.isDone(day), expanded: expandedItem === item}"
         :style="{'--color': categories.find(cat => cat.id === item.categoryId)?.color || 'var(--text-color)'}"
       >
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <div class="material-symbols-outlined check-box" @click="checkClick(item)">{{item.isDone(day) ? 'check_box' : 'check_box_outline_blank'}}</div>
+        <div class="list-item-task">
+          <div class="material-symbols-outlined check-box" @click.self="checkClick(item)">{{item.isDone(day) ? 'check_box' : 'check_box_outline_blank'}}</div>
           <div class="task-name" @click="expand(item)">{{item.task}}</div>
         </div>
-        <div v-if="expandedItem === item" style="display: flex; justify-content: flex-start; align-items: center; padding-left: calc(24px + 1rem); gap: 1rem;">
-          <div class="material-symbols-outlined" @click="remove(item)">close</div>
+        <div v-if="expandedItem === item" class="list-item-actions">
+          <div class="material-symbols-outlined" @click="remove(item)">delete</div>
           <div class="material-symbols-outlined" @click="modify(item)">edit</div>
-          <div v-if="!item.recurrent" class="material-symbols-outlined" @click="backlogReturn(item)">undo</div>
           <div v-if="!isSameDay(new Date(), day) && !item.isDone(day)" class="material-symbols-outlined" @click="report(item)">replay</div>
         </div>
       </div>
@@ -215,14 +214,44 @@ export default {
   align-items: flex-start;
   overflow-y: auto;
   gap: 0.3rem;
+  width: 100%;
+  padding-top: 2px;
 }
 .list .list-item {
+  position: relative;
   color: var(--color);
-  margin-left: 1rem;
+  padding-left: 1rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: calc(100vw - 1rem);
+  justify-content: stretch;
+  width: calc(100vw);
+  &.expanded {
+    box-shadow: 0 0 5px var(--bg-dark);
+  }
+  .list-item-task {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    .task-name {
+      flex-grow: 1;
+    }
+  }
+  .list-item-actions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem;
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    background: var(--bg-light);
+    padding: 4px 1em;
+    right: 10px;
+    z-index: 1;
+    color: var(--text-color);
+  }
 }
 .list .list-item .task-name::first-letter {
   text-transform: uppercase;

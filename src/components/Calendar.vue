@@ -14,6 +14,9 @@
           {{ task.task }}
         </div>
         <div v-if="dayTasks.more">+ {{ dayTasks.more }} more</div>
+        <div v-if="dayTasks.done && dayTasks.tasks.length" class="done-tasks material-symbols-outlined">check<div class="done-tasks-number">{{ dayTasks.done }}</div></div>
+        <div v-if="!dayTasks.tasks.length && !dayTasks.done" class="material-symbols-outlined calendar-nothing-todo">hotel</div>
+        <div v-if="!dayTasks.tasks.length && dayTasks.done" class="material-symbols-outlined calendar-all-done">check</div>
       </div>
     </div>
     <div v-if="showRefocus" class="material-symbols-outlined refocus" @click="refocus">point_scan</div>
@@ -40,13 +43,21 @@ export default {
       showRefocus: false
     }
   },
+  watch: {
+    async modelValue() {
+      await nextTick()
+      this.refocus()
+      this.changeCurrentDayObs()
+    }
+  },
   computed: {
     categories() {
       return store.categories
     },
     daysTasks() {
       return this.days.map(day => {
-        const tasks = this.getTasks(day)
+        const allTasks = this.getTasks(day)
+        const tasks = allTasks.filter(task => !task.isDone(day))
         if (tasks.length > 3) {
           var displayedTasks = tasks.slice(0, 2)
           var more = tasks.length - 2
@@ -56,7 +67,8 @@ export default {
         return {
           day,
           tasks: displayedTasks,
-          more
+          more,
+          done: allTasks.filter(task => task.isDone(day)).length
         }
       })
     }
@@ -64,7 +76,7 @@ export default {
   methods: {
     format,
     getTasks(day) {
-      return store.tasks.filter(task => !task.isDone(day) && task.display(day))
+      return store.tasks.filter(task => task.display(day))
     },
   	itemColor(task) {
   		return this.categories.find(cat => cat.id === task.categoryId)?.color || 'var(--text-color)'
@@ -139,7 +151,7 @@ export default {
   width: 100vw;
 }
 .calendar {
-  height: 100px;
+  height: 105px;
   width: 100vw;
   display: flex;
   font-size: 0.6em;
@@ -147,9 +159,10 @@ export default {
   margin-top: 0.3em;
   overflow-x: auto;
   .calendar-day {
+    position: relative;
     flex-shrink: 0;
     box-sizing: border-box;
-    width: 90px;
+    width: 80px;
     border: 2px solid var(--bg-dark);
     border-radius: 5px;
     height: 100%;
@@ -173,6 +186,44 @@ export default {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+    }
+    .done-tasks {
+      position: absolute;
+      top: 2px;
+      right: 5px;
+
+      font-size: 1em;
+      background: var(--text-color);
+      color: var(--bg-dark);
+      border-radius: 999px;
+      padding: 2px;
+      .done-tasks-number {
+        position: absolute;
+        font-size: 0.8em;
+        color: var(--text-color);
+        background: var(--bg-dark);
+        padding: 1px;
+        border: 1px solid var(--text-color);
+        border-radius: 999px;
+        aspect-ratio: 1 / 1;
+        bottom: -50%;
+        right: -50%;
+        width: 1.6em;
+        text-align: center;
+      }
+    }
+    .calendar-nothing-todo {
+      display: block;
+      color: var(--text-color);
+      opacity: 0.4;
+      font-size: 4em;
+    }
+    .calendar-all-done {
+      display: block;
+      color: var(--bg-dark);
+      background: var(--text-color);
+      font-size: 4em;
+      border-radius: 999px;
     }
   }
 }

@@ -1,7 +1,11 @@
-import { isSameDay, isToday, isAfter, differenceInDays, subDays, addDays } from 'date-fns'
+import { isSameDay, isToday, isAfter, differenceInDays, subDays, addDays, startOfMonth, addMonths } from 'date-fns'
 import { v4 } from 'uuid'
 
-const newDate = () => new Date(new Date().toDateString())
+const newDate = (date = new Date()) => new Date(new Date(date).toDateString())
+const nthMonthDay = (date, nth, day) => {
+	const firstDay = startOfMonth(newDate(date))
+	return addDays(firstDay, (day - firstDay.getDay() + 7) % 7 + nth * 7)
+}
 
 class Task {
 	constructor({task, categoryId, date, report, taskType, groupId}) {
@@ -10,40 +14,17 @@ class Task {
 		this.id = v4()
 		this.task = task
 		this.categoryId = categoryId
-		this.date = new Date(new Date(date).toDateString())
+		this.date = newDate(date)
 		this.report = report
 		this.taskType = taskType
 		this.groupId = groupId // MultiTasks: Multitasks are a group of tasks that have the same groupId
 	}
-
-	// isDate(d) {
-	// 	let date = new Date(d)
-	// 	if (isAfter(this.date, date)) {
-	// 		return false
-	// 	}
-
-	// 	if (this.isDone(date)) {
-	// 		return true
-	// 	}
-
-	// 	if (isSameDay(this.lastTimeToDo, date)) {
-	// 		return !this.report || this.isDone(this.lastTimeToDo) || isToday(date)
-	// 	} else if (this.report && isToday(date)) {
-	// 		return !this.isDone(this.lastTimeToDo)
-	// 	} else {
-	// 		return false
-	// 	}
-	// }
 
 	display() {
 		throw new Error('Use implementation of this class and override this method')
 	}
 
 	isDone() {
-		throw new Error('Use implementation of this class and override this method')
-	}
-
-	setDone() {
 		throw new Error('Use implementation of this class and override this method')
 	}
 
@@ -60,11 +41,11 @@ class SimpleTask extends Task {
 	}
 
 	get lastTimeToDo() {
-		return new Date(this.done || this.date) // done
+		return newDate(this.done || this.date) // done
 	}
 
 	display(d) {
-		let date = new Date(d)
+		let date = newDate(d)
 		if (isAfter(this.date, date)) return false
 	
 		if (this.report && !this.done) {
@@ -75,18 +56,14 @@ class SimpleTask extends Task {
 	}
 
 	isDone(date) {
-		return isSameDay(this.done, new Date(date))
-	}
-
-	setDone(date) {
-		this.done = new Date(date)
+		return isSameDay(this.done, newDate(date))
 	}
 
 	toggleDone(date) {
-		if (isSameDay(new Date(date), new Date(this.done))) {
+		if (this.done && isSameDay(newDate(date), newDate(this.done))) {
 			this.done = undefined
 		} else {
-			this.done = new Date(date)
+			this.done = newDate(date)
 		}
 	}
 }
@@ -100,16 +77,16 @@ class RepeatingTask extends Task {
 	}
 
 	get lastTimeToDo() {
-		return subDays(newDate(), differenceInDays(newDate(), new Date(this.done.at(-1) || this.date)) % this.periodSpan)
+		return subDays(newDate(), differenceInDays(newDate(), newDate(this.done.at(-1) || this.date)) % this.periodSpan)
 	}
 
 	display(d) {
-		let date = new Date(d)
+		let date = newDate(d)
 		if (isAfter(this.date, date)) return false
 
-		if (this.done.some(e => isSameDay(new Date(e), date))) {
+		if (this.done.some(e => isSameDay(newDate(e), date))) {
 			return true
-		} else if (this.report && !this.done.some(e => isSameDay(this.lastTimeToDo, new Date(e)))) {
+		} else if (this.report && !this.done.some(e => isSameDay(this.lastTimeToDo, newDate(e)))) {
 			return (isAfter(date, newDate()) || isSameDay(date, newDate())) && !(differenceInDays(newDate(), date) % this.periodSpan)
 		} else {
 			return !(differenceInDays(this.lastTimeToDo, date) % this.periodSpan)
@@ -117,19 +94,15 @@ class RepeatingTask extends Task {
 	}
 
 	isDone(date) {
-		return this.done.some(e => isSameDay(new Date(e), new Date(date)))
-	}
-
-	setDone(date) {
-		this.done.push(new Date(date))
+		return this.done.some(e => isSameDay(newDate(e), newDate(date)))
 	}
 
 	toggleDone(date) {
-		const index = this.done.findIndex(e => isSameDay(new Date(e), new Date(date)))
+		const index = this.done.findIndex(e => isSameDay(newDate(e), newDate(date)))
 		if (index + 1) {
 			this.done.splice(index, 1)
 		} else {
-			this.done.push(new Date(date))
+			this.done.push(newDate(date))
 		}
 	}
 }
@@ -143,16 +116,39 @@ class WeeklyTask extends Task {
 	}
 
 	get lastTimeToDo() { // done
-		let previousDay = [...this.weekDays, ...this.weekDays.map(day => day + 7)].sort((a, b) => (a - b) > 0 ? -1 : 1).find(day => day < (new Date().getDay() + 7)) % 7
-		return subDays(new Date(), (new Date().getDay() - previousDay + 7) % 7)
+		let previousDay = [...this.weekDays, ...this.weekDays.map(day => day + 7)].sort((a, b) => (a - b) > 0 ? -1 : 1).find(day => day < (newDate().getDay() + 7)) % 7
+		let previousDate = subDays(newDate(), (newDate().getDay() - previousDay + 7) % 7)
+
+		if (isAfter(this.date, previousDate)) return
+
+		return previousDate
+	}
+
+	display(d) {
+		let date = newDate(d)
+		if (isAfter(this.date, date)) return false
+
+		if (this.done.some(e => isSameDay(newDate(e), date))) {
+			return true
+		} else if (this.report && this.lastTimeToDo && !this.isDone(this.lastTimeToDo) && isSameDay(date, newDate())) {
+			return true
+		} else if (this.report && this.lastTimeToDo && !this.isDone(this.lastTimeToDo) && isSameDay(date, this.lastTimeToDo)) {
+			return false
+		} else {
+			return this.weekDays.some(weekDay => weekDay === date.getDay())
+		}
 	}
 
 	isDone(date) {
-		return this.done.some(e => isSameDay(e, new Date(date)))
+		return this.done.some(e => isSameDay(newDate(e), newDate(date)))
 	}
 
-	setDone(date) {
-		this.done.push(this.lastTimeToDo)
+	toggleDone(date) {
+		if (this.isDone(this.lastTimeToDo)) {
+			this.done.splice(this.done.indexOf(e => isSameDay(newDate(e), newDate(date))), 1)
+		} else {
+			this.done.push(this.lastTimeToDo)
+		}
 	}
 }
 
@@ -164,23 +160,48 @@ class MonthlyTask extends Task {
 		this.monthDate = monthDate
 		this.dayOfMonth = dayOfMonth
 		this.done = []
+
+		let startDate = newDate(this.monthDate)
+		startDate.setDate(this.dayOfMonth)
+		this.date = newDate(startDate)
 	}
 
 	get lastTimeToDo() { // done
-		let lastTimeToDo = new Date(date)
-		if (this.dayOfMonth > date.getDay()) {
+		let lastTimeToDo = newDate()
+		if (this.dayOfMonth > lastTimeToDo.getDate()) {
 			lastTimeToDo.setMonth(lastTimeToDo.getMonth() - 1)
 		}
-		lastTimeToDo.setDay(this.dayOfMonth)
+		lastTimeToDo.setDate(this.dayOfMonth)
 		return lastTimeToDo
 	}
 
-	isDone(date) {
-		return this.done.some(e => isSameDay(e, new Date(date)))
+	display(d) {
+		let date = newDate(d)
+		if (isAfter(this.date, date)) return false
+
+		if (this.done.some(e => isSameDay(newDate(e), date))) {
+			return true
+		} else if (!this.report) {
+			return date.getDate() === this.dayOfMonth
+		} else if (this.isDone(this.lastTimeToDo)) {
+			return date.getDate() === this.dayOfMonth
+		} else if ((isAfter(date, this.lastTimeToDo) || isSameDay(date, this.lastTimeToDo)) && isAfter(addMonths(this.lastTimeToDo, 1), date)) {
+			return isSameDay(date, newDate())
+		} else {
+			return date.getDate() === this.dayOfMonth
+		}
 	}
 
-	setDone(date) {
-		this.done.push(this.lastTimeToDo)
+	isDone(date) {
+		return this.done.some(e => isSameDay(newDate(e), newDate(date)))
+	}
+
+	toggleDone(date) {
+		if (this.isDone(this.lastTimeToDo)) {
+			this.done.splice(this.done.indexOf(e => isSameDay(newDate(e), newDate(date))), 1)
+		} else {
+			this.done.push(this.lastTimeToDo)
+		}
 	}
 }
 
@@ -193,29 +214,56 @@ class MonthlyWeekDayTask extends Task {
 		this.weekNumber = weekNumber
 		this.weekDay = weekDay
 		this.done = []
+
+		this.date = nthMonthDay(newDate(this.monthDate), this.weekNumber, this.weekDay)
 	}
 
 	get lastTimeToDo() { // done
 		// Can probably optimize all this with only one loop and a smarter check to know if we are in the correct month from the start
-		let todoThisMonth = new Date()
+		let todoThisMonth = newDate()
 		todoThisMonth.setDate(1)
-		while(todoThisMonth.getDay() !== weekDay) {
-			addDays(todoThisMonth, 1)
+		while(todoThisMonth.getDay() !== this.weekDay) {
+			todoThisMonth = addDays(todoThisMonth, 1)
 		}
-		addDays(todoThisMonth, (this.weekNumber - 1) * 7)
-		if (!isSameDay(new Date(), todoThisMonth) && isAfter(todoThisMonth, new Date())) {
+		addDays(todoThisMonth, this.weekNumber * 7)
+		if (!isSameDay(newDate(), todoThisMonth) && isAfter(todoThisMonth, newDate())) {
 			todoThisMonth.setDate(1)
 			todoThisMonth.setMonth(todoThisMonth.getMonth() - 1)
 			while(todoThisMonth.getDay() !== weekDay) {
-				addDays(todoThisMonth, 1)
+				todoThisMonth = addDays(todoThisMonth, 1)
 			}
-			addDays(todoThisMonth, (this.weekNumber - 1) * 7)
+			addDays(todoThisMonth, this.weekNumber * 7)
 		}
 		return todoThisMonth
 	}
 
-	setDone(date) {
-		this.done.push(this.lastTimeToDo)
+	display(d) {
+		let date = newDate(d)
+		if (isAfter(this.date, date)) return false
+
+		if (this.done.some(e => isSameDay(newDate(e), date))) {
+			return true
+		} else if (!this.report) {
+			return isSameDay(date, nthMonthDay(date, this.weekNumber, this.weekDay))
+		} else if (this.isDone(this.lastTimeToDo)) {
+			return isSameDay(date, nthMonthDay(date, this.weekNumber, this.weekDay))
+		} else if ((isAfter(date, this.lastTimeToDo) || isSameDay(date, this.lastTimeToDo)) && isAfter(nthMonthDay(addMonths(this.lastTimeToDo, 1), this.weekNumber, this.weekDay), date)) {
+			return isSameDay(date, newDate())
+		} else {
+			return isSameDay(date, nthMonthDay(date, this.weekNumber, this.weekDay))
+		}
+	}
+
+	isDone(date) {
+		return this.done.some(e => isSameDay(newDate(e), newDate(date)))
+	}
+
+	toggleDone(date) {
+		if (this.isDone(this.lastTimeToDo)) {
+			this.done.splice(this.done.indexOf(e => isSameDay(newDate(e), newDate(date))), 1)
+		} else {
+			this.done.push(this.lastTimeToDo)
+		}
 	}
 }
 

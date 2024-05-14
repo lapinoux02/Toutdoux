@@ -66,7 +66,7 @@ export default {
       periodSpan: this.modelValue?.periodSpan ?? 1,
       // MonthlyTasks
       monthType: monthTypes[this.modelValue?.monthType ?? 0],
-      monthDate: this.modelValue?.monthDate ?? format(new Date(), 'y-MM'),
+      monthDate: format(this.modelValue?.monthDate ?? new Date(), 'y-MM'),
       // Monthly
       dayOfMonth: this.modelValue?.dayOfMonth ?? 1,
       // MonthlyWeekDay
@@ -109,7 +109,7 @@ export default {
         periodSpan: this.periodSpan,
         monthType: this.monthType.id,
         monthDate: new Date(this.monthDate),
-        dayOfMonth: new Date(this.dayOfMonth),
+        dayOfMonth: this.dayOfMonth,
         weekNumber: this.weekNumber.id,
         weekDay: this.weekDay
       }
@@ -165,5 +165,10 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  overflow-y: auto;
+  padding-bottom: 1em;
+  > * {
+    flex-shrink: 0;
+  }
 }
 </style>

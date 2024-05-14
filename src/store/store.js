@@ -35,7 +35,6 @@ export const store = reactive({
     if (!storage) return
 
     this.categories = storage.categories
-    // this.tasks = storage.tasks
     storage.tasks.forEach(task => {
       switch(task.taskType) {
         case 0:

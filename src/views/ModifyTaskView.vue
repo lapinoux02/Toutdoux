@@ -36,36 +36,4 @@ export default {
 }
 </script>
 <style scoped>
-.modify-task-form {
-	margin: 0 1rem;
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-}
-.modify-task-form .category-select {
-	flex-grow: 1;
-}
-.modify-task-form .recurence {
-	display: flex;
-	gap: 1rem;
-}
-.modify-task-form .recurence .day {
-	width: 1.5rem;
-	height: 1.5rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border-radius: 1.5rem;
-	border: 1px solid var(--text-color);
-	color: var(--text-color);
-	font-size: 0.8rem;
-}
-.modify-task-form .date-input {
-	width: 100%;
-}
-.modify-task-form .recurence .day.selected {
-	border: 1px solid var(--text-color);
-	background: var(--text-color);
-	color: var(--bg-dark);
-}
 </style>
