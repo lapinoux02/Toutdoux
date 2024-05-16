@@ -37,7 +37,7 @@ class SimpleTask extends Task {
 	constructor({task, categoryId, date, report, done = undefined}) {
 		super({task, categoryId, date, report, taskType: 0})
 
-		this.done = done
+		this.done = newDate(done)
 	}
 
 	get lastTimeToDo() {
@@ -73,7 +73,7 @@ class RepeatingTask extends Task {
 		super({task, categoryId, date, report, taskType: 2})
 
 		this.periodSpan = periodSpan
-		this.done = done
+		this.done = done.map(newDate)
 	}
 
 	get lastTimeToDo() {
@@ -108,11 +108,11 @@ class RepeatingTask extends Task {
 }
 
 class WeeklyTask extends Task {
-	constructor({task, categoryId, date, report, weekDays}) {
+	constructor({task, categoryId, date, report, weekDays, done = []}) {
 		super({task, categoryId, date, report, taskType: 1})
 
 		this.weekDays = weekDays
-		this.done = []
+		this.done = done.map(newDate)
 	}
 
 	get lastTimeToDo() { // done
@@ -153,13 +153,13 @@ class WeeklyTask extends Task {
 }
 
 class MonthlyTask extends Task {
-	constructor({task, categoryId, monthDate, report, dayOfMonth}) {
+	constructor({task, categoryId, monthDate, report, dayOfMonth, done = []}) {
 		super({task, categoryId, date: monthDate, report, taskType: 3})
 
 		this.monthType = 0
 		this.monthDate = monthDate
 		this.dayOfMonth = dayOfMonth
-		this.done = []
+		this.done = done.map(newDate)
 
 		let startDate = newDate(this.monthDate)
 		startDate.setDate(this.dayOfMonth)
@@ -206,14 +206,14 @@ class MonthlyTask extends Task {
 }
 
 class MonthlyWeekDayTask extends Task {
-	constructor({task, categoryId, monthDate, report, weekNumber, weekDay}) {
+	constructor({task, categoryId, monthDate, report, weekNumber, weekDay, done = []}) {
 		super({task, categoryId, date: monthDate, report, taskType: 3})
 
 		this.monthType = 1
 		this.monthDate = monthDate
 		this.weekNumber = weekNumber
 		this.weekDay = weekDay
-		this.done = []
+		this.done = done.map(newDate)
 
 		this.date = nthMonthDay(newDate(this.monthDate), this.weekNumber, this.weekDay)
 	}

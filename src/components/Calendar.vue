@@ -16,7 +16,7 @@
         <div v-if="dayTasks.more">+ {{ dayTasks.more }} more</div>
         <div v-if="dayTasks.done && dayTasks.tasks.length" class="done-tasks material-symbols-outlined">check<div class="done-tasks-number">{{ dayTasks.done }}</div></div>
         <div v-if="!dayTasks.tasks.length && !dayTasks.done" class="material-symbols-outlined calendar-nothing-todo">hotel</div>
-        <div v-if="!dayTasks.tasks.length && dayTasks.done" class="material-symbols-outlined calendar-all-done">check</div>
+        <div v-if="!dayTasks.tasks.length && dayTasks.done" class="material-symbols-outlined calendar-all-done">done_all</div>
       </div>
     </div>
     <div v-if="showRefocus" class="material-symbols-outlined refocus" @click="refocus">point_scan</div>
@@ -217,6 +217,7 @@ export default {
       color: var(--text-color);
       opacity: 0.4;
       font-size: 4em;
+      margin: auto;
     }
     .calendar-all-done {
       display: block;
@@ -224,6 +225,7 @@ export default {
       background: var(--text-color);
       font-size: 4em;
       border-radius: 999px;
+      margin: auto;
     }
   }
 }
