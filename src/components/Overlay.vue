@@ -6,27 +6,41 @@
 			<div class="header">Tout doux liste</div>
 			<div class="separator"></div>
 			<div class="menu-link" @click="goto('home')"><div class="material-symbols-outlined">label</div>Home</div>
-			<div class="menu-link" @click="goto('backlog')"><div class="material-symbols-outlined">label</div>Backlog</div>
 			<div class="menu-link" @click="goto('tasksManagement')"><div class="material-symbols-outlined">label</div>Tasks management</div>
+			<div class="menu-link" @click="goto('categoriesManagement')"><div class="material-symbols-outlined">label</div>Categories management</div>
 			<div class="separator"></div>
-			<div class="menu-link" @click="goto('newTask')"><div class="material-symbols-outlined">add_circle</div>Nouvelle tache</div>
-			<div class="menu-link" @click="goto('newMultiTask')"><div class="material-symbols-outlined">add_circle</div>Nouvelle tache multiple</div>
-			<div class="menu-link" @click="goto('newCategory')"><div class="material-symbols-outlined">add_circle</div>Nouvelle catégorie</div>
+			<div class="menu-link" @click="goto('newTask')"><div class="material-symbols-outlined">add_circle</div>New task</div>
+			<div class="menu-link" @click="goto('newCategory')"><div class="material-symbols-outlined">add_circle</div>New category</div>
+			<div class="separator"></div>
+			<div class="menu-link" @click="download"><div class="material-symbols-outlined">download</div>Save</div>
+			<div class="menu-link" v-if="navigator.share" @click="share"><div class="material-symbols-outlined">share</div>Share</div>
+			<div class="menu-link" v-if="navigator.clipboard?.read" @click="upload"><div class="material-symbols-outlined">upload</div>Import</div>
 		</div>
 	</div>
 </div>
 </template>
 <script>
+import { store } from '@/store/store.js'
 export default {
 	data() {
 		return {
-			expanded: false
+			expanded: false,
+			navigator
 		}
 	},
 	methods: {
 		goto(route) {
 			this.$router.push({name: route})
 			this.expanded = false
+		},
+		download() {
+			store.download()
+		},
+		share() {
+			store.share()
+		},
+		upload() {
+			store.upload()
 		}
 	}
 }

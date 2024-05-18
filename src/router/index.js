@@ -1,12 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { store } from '@/store/store.js'
 import HomeView from '/src/views/HomeView.vue'
-import BacklogView from '/src/views/BacklogView.vue'
-import AddTaskView from '/src/views/NewTaskView.vue'
-import NewMultiTaskView from '/src/views/NewMultiTaskView.vue'
 import NewCategoryView from '/src/views/NewCategoryView.vue'
+import CategoriesManagementView from '/src/views/CategoriesManagementView.vue'
+import AddTaskView from '/src/views/NewTaskView.vue'
 import ModifyTaskView from '/src/views/ModifyTaskView.vue'
-import ModifyMultiTaskView from '/src/views/ModifyMultiTaskView.vue'
 import TasksManagementView from '/src/views/TasksManagementView.vue'
 
 const router = createRouter({
@@ -16,10 +14,6 @@ const router = createRouter({
     name: 'home',
     component: HomeView
   }, {
-    path: '/backlog',
-    name: 'backlog',
-    component: BacklogView
-  }, {
     path: '/tasks-management',
     name: 'tasksManagement',
     component: TasksManagementView
@@ -28,22 +22,17 @@ const router = createRouter({
     name: 'newTask',
     component: AddTaskView
   }, {
-    path: '/new-multi-task',
-    name: 'newMultiTask',
-    component: NewMultiTaskView
-  }, {
     path: '/new-category',
     name: 'newCategory',
     component: NewCategoryView
   }, {
+    path: '/categories-management',
+    name: 'categoriesManagement',
+    component: CategoriesManagementView
+  }, {
     path: '/modify-task/:taskId',
     name: 'modifyTask',
     component: ModifyTaskView,
-    props: true
-  }, {
-    path: '/modify-multi-task/:parentTaskId',
-    name: 'modifyMultiTask',
-    component: ModifyMultiTaskView,
     props: true
   }]
 })

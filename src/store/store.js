@@ -4,6 +4,13 @@ import { SimpleTask, RepeatingTask, WeeklyTask, MonthlyTask, MonthlyWeekDayTask 
 export const store = reactive({
   categories: [],
   tasks: [],
+  removeCategory(categoryId) {
+    this.tasks.forEach(task => {
+      if (task.categoryId === categoryId) task.categoryId = undefined
+    })
+    this.categories.splice(this.categories.findIndex(c => c.id === categoryId), 1)
+    this.save()
+  },
   getTask(taskId) {
     return this.tasks.find(task => task.id === taskId)
   },
@@ -31,11 +38,14 @@ export const store = reactive({
     localStorage.setItem('todo', JSON.stringify({categories: this.categories, tasks: this.tasks}))
   },
   load() {
-    let storage = JSON.parse(localStorage.getItem('todo'))
+    this.loadFromString(localStorage.getItem('todo'))
+  },
+  loadFromString(string) {
+    let storage = JSON.parse(string)
     if (!storage) return
 
-    this.categories = storage.categories
-    storage.tasks.forEach(task => {
+    this.categories = storage.categories || [];
+    (storage.tasks || []).forEach(task => {
       switch(task.taskType) {
         case 0:
           var newTask = new SimpleTask(task)
@@ -58,5 +68,17 @@ export const store = reactive({
       }
       this.tasks.push(newTask)
     })
+  },
+  download() {
+    const link = document.createElement('a')
+    link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify({categories: this.categories, tasks: this.tasks})))
+    link.setAttribute('download', 'Toutdoux.txt')
+    link.click()
+  },
+  share() {
+    navigator.share({text: JSON.stringify({categories: this.categories, tasks: this.tasks})})
+  },
+  async upload() {
+    this.loadFromString(await navigator.clipboard.read())
   }
 })

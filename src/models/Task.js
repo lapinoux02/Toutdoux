@@ -38,7 +38,7 @@ class SimpleTask extends Task {
 	constructor({task, categoryId, date, report, done = undefined}) {
 		super({task, categoryId, date, report, taskType: 0})
 
-		this.done = newDate(done)
+		this.done = done && newDate(done)
 	}
 
 	get lastTimeToDo() {

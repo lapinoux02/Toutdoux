@@ -225,7 +225,7 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   justify-content: stretch;
-  width: calc(100vw);
+  width: 100vw;
   &.expanded {
     box-shadow: 0 0 5px var(--bg-dark);
   }
@@ -252,9 +252,6 @@ export default {
     z-index: 1;
     color: var(--text-color);
   }
-}
-.list .list-item .task-name::first-letter {
-  text-transform: uppercase;
 }
 .list .list-item.done .task-name {
   text-decoration: line-through;

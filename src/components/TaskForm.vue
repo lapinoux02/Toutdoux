@@ -58,7 +58,7 @@ export default {
       categoryId: this.modelValue?.categoryId ?? '',
       date: format(this.modelValue?.date ?? new Date(), 'y-MM-dd'),
       report: this.modelValue?.report ?? false,
-      taskType: taskTypes[this.modelValue?.taskType ?? 0],
+      taskType: this.modelValue?.taskType ? taskTypes.find(taskType => taskType.id === this.modelValue.taskType) : taskTypes[0],
       // Simple (empty)
       // Weekly
       weekDays: this.modelValue?.weekDays ?? [],

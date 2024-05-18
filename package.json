@@ -9,6 +9,7 @@
     "test:unit": "vitest"
   },
   "dependencies": {
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
     "date-fns": "^2.30.0",
     "uuid": "^9.0.1",
     "vue": "^3.3.4",
