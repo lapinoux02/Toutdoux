@@ -8,16 +8,19 @@
       <div class="form-line"><span class="material-symbols-outlined">event</span><input type="date" v-model="date"></div>
     </template>
     <template v-if="taskType.id === 1">
-      <div class="form-line"><span class="material-symbols-outlined">event</span><input type="date" v-model="date"></div>
+      <div class="form-line"><span class="material-symbols-outlined">start</span><input type="date" v-model="date"></div>
+      <div class="form-line"><span class="material-symbols-outlined">event_available</span><input type="date" v-model="endDate"></div>
       <week-days v-model="weekDays" style="font-size: 0.6em"></week-days>
     </template>
     <template v-if="taskType.id === 2">
-      <div class="form-line"><span class="material-symbols-outlined">event</span><input type="date" v-model="date"></div>
+      <div class="form-line"><span class="material-symbols-outlined">start</span><input type="date" v-model="date"></div>
+      <div class="form-line"><span class="material-symbols-outlined">event_available</span><input type="date" v-model="endDate"></div>
       <div class="form-line"><span class="material-symbols-outlined">chronic</span><input type="number" v-model="periodSpan"></div>
     </template>
     <template v-if="taskType.id === 3">
       <multiselect v-model="monthType" :options="monthTypes" style="font-size: 0.6em"></multiselect>
-      <div class="form-line"><span class="material-symbols-outlined">calendar_month</span><input type="month" v-model="monthDate"></div>
+      <div class="form-line"><span class="material-symbols-outlined">start</span><input type="month" v-model="monthDate"></div>
+      <div class="form-line"><span class="material-symbols-outlined">event_available</span><input type="month" v-model="endDate"></div>
       <template v-if="monthType.id === 0">
         <div class="form-line"><span class="material-symbols-outlined">today</span><input type="number" v-model="dayOfMonth"></div>
       </template>
@@ -57,6 +60,7 @@ export default {
       task: this.modelValue?.task ?? '',
       categoryId: this.modelValue?.categoryId ?? '',
       date: format(this.modelValue?.date ?? new Date(), 'y-MM-dd'),
+      endDate: this.modelValue?.endDate && format(this.modelValue.endDate, 'y-MM-dd'),
       report: this.modelValue?.report ?? false,
       taskType: this.modelValue?.taskType ? taskTypes.find(taskType => taskType.id === this.modelValue.taskType) : taskTypes[0],
       // Simple (empty)

@@ -9,16 +9,17 @@ const nthMonthDay = (date, nth, day) => {
 const isAfterOrSame = (date1, date2) => isAfter(date1, date2) || isSameDay(date1, date2)
 
 class Task {
-	constructor({task, categoryId, date, report, taskType, groupId}) {
+	constructor({task, categoryId, date, endDate, report, taskType, groupId}) {
 		if (!task) throw new Error('task must be defined')
 
 		this.id = v4()
 		this.task = task
 		this.categoryId = categoryId
 		this.date = newDate(date)
+		this.endDate = endDate && newDate(endDate)
 		this.report = report
 		this.taskType = taskType
-		this.groupId = groupId // MultiTasks: Multitasks are a group of tasks that have the same groupId
+		this.groupId = groupId // MultiTasks: Multitasks are a group of tasks that have the same groupId. Obsolete
 	}
 
 	display() {
@@ -35,8 +36,8 @@ class Task {
 }
 
 class SimpleTask extends Task {
-	constructor({task, categoryId, date, report, done = undefined}) {
-		super({task, categoryId, date, report, taskType: 0})
+	constructor({task, categoryId, date, endDate, report, done = undefined}) {
+		super({task, categoryId, date, endDate, report, taskType: 0})
 
 		this.done = done && newDate(done)
 	}
@@ -47,7 +48,7 @@ class SimpleTask extends Task {
 
 	display(d) {
 		let date = newDate(d)
-		if (isAfter(this.date, date)) return false
+		if (isAfter(this.date, date) || isAfter(date, this.endDate)) return false
 	
 		if (this.report && !this.done) {
 			return isToday(date)
@@ -70,8 +71,8 @@ class SimpleTask extends Task {
 }
 
 class RepeatingTask extends Task {
-	constructor({task, categoryId, date, report, periodSpan, done = []}) {
-		super({task, categoryId, date, report, taskType: 2})
+	constructor({task, categoryId, date, endDate, report, periodSpan, done = []}) {
+		super({task, categoryId, date, endDate, report, taskType: 2})
 
 		this.periodSpan = periodSpan
 		this.done = done.map(newDate)
@@ -83,7 +84,7 @@ class RepeatingTask extends Task {
 
 	display(d) {
 		let date = newDate(d)
-		if (isAfter(this.date, date)) return false
+		if (isAfter(this.date, date) || isAfter(date, this.endDate)) return false
 
 		if (this.done.some(e => isSameDay(newDate(e), date))) {
 			return true
@@ -109,8 +110,8 @@ class RepeatingTask extends Task {
 }
 
 class WeeklyTask extends Task {
-	constructor({task, categoryId, date, report, weekDays, done = []}) {
-		super({task, categoryId, date, report, taskType: 1})
+	constructor({task, categoryId, date, endDate, report, weekDays, done = []}) {
+		super({task, categoryId, date, endDate, report, taskType: 1})
 
 		this.weekDays = weekDays
 		this.done = done.map(newDate)
@@ -126,7 +127,7 @@ class WeeklyTask extends Task {
 
 	display(d) {
 		let date = newDate(d)
-		if (isAfter(this.date, date)) return false
+		if (isAfter(this.date, date) || isAfter(date, this.endDate)) return false
 
 		const nextTimeToDo = addDays(newDate(), 1)
 		while(this.weekDays.every(wd => nextTimeToDo.getDay() !== wd)) nextTimeToDo.setDate(nextTimeToDo.getDate() + 1)
@@ -151,17 +152,22 @@ class WeeklyTask extends Task {
 }
 
 class MonthlyTask extends Task {
-	constructor({task, categoryId, monthDate, report, dayOfMonth, done = []}) {
-		super({task, categoryId, date: monthDate, report, taskType: 3})
+	constructor({task, categoryId, monthDate, monthEndDate, report, dayOfMonth, done = []}) {
+		super({task, categoryId, report, taskType: 3})
 
 		this.monthType = 0
 		this.monthDate = monthDate
+		this.monthEndDate = monthEndDate
 		this.dayOfMonth = dayOfMonth
 		this.done = done.map(newDate)
 
-		let startDate = newDate(this.monthDate)
+		let startDate = newDate(monthDate)
 		startDate.setDate(this.dayOfMonth)
 		this.date = newDate(startDate)
+
+		let endDate = newDate(monthEndDate)
+		endDate.setDate(this.dayOfMonth)
+		this.endDate = newDate(endDate)
 	}
 
 	get lastTimeToDo() {
@@ -175,7 +181,7 @@ class MonthlyTask extends Task {
 
 	display(d) {
 		let date = newDate(d)
-		if (isAfter(this.date, date)) return false
+		if (isAfter(this.date, date) || isAfter(date, this.endDate)) return false
 
 		const nextTimeToDo = addMonths(this.lastTimeToDo, 1)
 		if (this.report && !this.isDone(this.lastTimeToDo) && (isAfterOrSame(date, this.lastTimeToDo)) && isAfter(nextTimeToDo, date)) {
@@ -199,16 +205,18 @@ class MonthlyTask extends Task {
 }
 
 class MonthlyWeekDayTask extends Task {
-	constructor({task, categoryId, monthDate, report, weekNumber, weekDay, done = []}) {
+	constructor({task, categoryId, monthDate, monthEndDate, report, weekNumber, weekDay, done = []}) {
 		super({task, categoryId, date: monthDate, report, taskType: 3})
 
 		this.monthType = 1
 		this.monthDate = monthDate
+		this.monthEndDate = monthEndDate
 		this.weekNumber = weekNumber
 		this.weekDay = weekDay
 		this.done = done.map(newDate)
 
 		this.date = nthMonthDay(newDate(this.monthDate), this.weekNumber, this.weekDay)
+		this.endDate = nthMonthDay(newDate(this.monthEndDate), this.weekNumber, this.weekDay)
 	}
 
 	get lastTimeToDo() {
@@ -222,7 +230,7 @@ class MonthlyWeekDayTask extends Task {
 
 	display(d) {
 		let date = newDate(d)
-		if (isAfter(this.date, date)) return false
+		if (isAfter(this.date, date) || isAfter(date, this.endDate)) return false
 
 		const nextTimeToDo = nthMonthDay(addMonths(this.lastTimeToDo, 1), this.weekNumber, this.weekDay)
 		if (this.report && !this.isDone(this.lastTimeToDo) && (isAfterOrSame(date, this.lastTimeToDo)) && isAfter(nextTimeToDo, date)) {
