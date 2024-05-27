@@ -1,7 +1,11 @@
 <template>
   <div class="task-form">
     <div class="form-line"><span class="material-symbols-outlined">task</span><input placeholder="Tache" v-model="task"></div>
-    <div class="form-line"><div class="material-symbols-outlined">sell</div><select v-model="categoryId"><option value="">Aucune catégorie</option><option v-for="category in categories" :value="category.id">{{category.name}}</option></select></div>
+    <div class="form-line">
+      <div class="material-symbols-outlined">sell</div>
+      <select v-model="categoryId"><option value="">Aucune catégorie</option><option v-for="category in categories" :value="category.id">{{category.name}}</option></select>
+      <div class="category-color-preview" :style="{color: (categories.find(c => c.id === categoryId) || {color: 'var(--text-color)'}).color}"></div>
+    </div>
     <div class="form-line"><span class="material-symbols-outlined">event_repeat</span><toggle v-model="report"></toggle></div>
     <multiselect v-model="taskType" :options="taskTypes" style="font-size: 0.6em"></multiselect>
     <template v-if="taskType.id === 0">
@@ -61,7 +65,7 @@ export default {
       categoryId: this.modelValue?.categoryId ?? '',
       date: format(this.modelValue?.date ?? new Date(), 'y-MM-dd'),
       endDate: this.modelValue?.endDate && format(this.modelValue.endDate, 'y-MM-dd'),
-      report: this.modelValue?.report ?? false,
+      report: this.modelValue?.report ?? true,
       taskType: this.modelValue?.taskType ? taskTypes.find(taskType => taskType.id === this.modelValue.taskType) : taskTypes[0],
       // Simple (empty)
       // Weekly
@@ -173,6 +177,12 @@ export default {
   padding-bottom: 1em;
   > * {
     flex-shrink: 0;
+  }
+  .category-color-preview {
+    width: 1em;
+    aspect-ratio: 1;
+    border-radius: 1em;
+    background-color: currentColor;
   }
 }
 </style>
