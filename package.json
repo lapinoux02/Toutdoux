@@ -5,21 +5,19 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview",
-    "test:unit": "vitest"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@vitejs/plugin-basic-ssl": "^1.1.0",
-    "date-fns": "^2.30.0",
-    "uuid": "^9.0.1",
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.4",
-    "vue3-touch-events": "^4.1.8"
+    "date-fns": "^4.1.0",
+    "gh-pages": "^6.3.0",
+    "uuid": "^14.0.0",
+    "vite-plugin-mkcert": "^2.0.0",
+    "vue": "^3.5.33",
+    "vue-router": "^5.0.6",
+    "vue3-touch-events": "^5.0.15"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.2.3",
-    "@vue/test-utils": "^2.4.1",
-    "vite": "^4.4.6",
-    "vitest": "^0.34.2"
+    "@vitejs/plugin-vue": "^6.0.6",
+    "vite": "^8.0.10"
   }
 }
