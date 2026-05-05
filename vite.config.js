@@ -10,9 +10,7 @@ export default defineConfig({
     vue(),
     mkcert()
   ],
-  server: {
-    https: true
-  },
+  base: '/Toutdoux/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
