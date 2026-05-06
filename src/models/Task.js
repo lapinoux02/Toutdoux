@@ -48,7 +48,7 @@ class SimpleTask extends Task {
 
 	display(d) {
 		let date = newDate(d)
-		if (isAfter(this.date, date) || isAfter(date, this.endDate)) return false
+		if (isAfter(this.date, date)) return false
 	
 		if (this.report && !this.done) {
 			return isToday(date)
