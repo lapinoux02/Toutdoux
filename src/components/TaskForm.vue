@@ -113,7 +113,7 @@ export default {
         report: this.report,
         taskType: this.taskType.id,
         date: new Date(this.date),
-        endDate: new Date(this.endDate),
+        endDate: this.endDate && new Date(this.endDate),
         weekDays: this.weekDays.map(e => e.id),
         periodSpan: this.periodSpan,
         monthType: this.monthType.id,
