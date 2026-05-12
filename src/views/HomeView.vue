@@ -21,14 +21,14 @@
         @dragstart="startDrag(item)"
         @dragover="dragOver(item)"
         @dragend="endDrag"
-        :class="{done: item.isDone(day), expanded: expandedItem === item}"
+        :class="{done: item.isDone(day)}"
         :style="{'--color': categories.find(cat => cat.id === item.categoryId)?.color || 'var(--text-color)'}"
       >
         <div class="list-item-task">
           <div class="material-symbols-outlined check-box" @click.self="checkClick(item)">{{item.isDone(day) ? 'check_box' : 'check_box_outline_blank'}}</div>
           <div class="task-name" @click="expand(item)">{{item.task}}</div>
         </div>
-        <div v-if="expandedItem === item" class="list-item-actions">
+        <div class="list-item-actions">
           <div class="material-symbols-outlined" @click="remove(item)">delete</div>
           <div class="material-symbols-outlined" @click="modify(item)">edit</div>
           <div v-if="!isSameDay(new Date(), day) && !item.isDone(day)" class="material-symbols-outlined" @click="report(item)">replay</div>
@@ -53,7 +53,6 @@ export default {
       categories: store.categories,
       draggedItem: undefined,
       selectedCategory: undefined,
-      expandedItem: undefined,
       keyboardEventListener: rightLeft(this.addDay, this.subDay)
     }
   },
@@ -128,7 +127,6 @@ export default {
       let date = item.date
       item.date = new Date()
       store.save()
-      this.expandedItem = undefined
       notificationStore.notification = {
         item,
         action: 'reportée',
@@ -139,18 +137,7 @@ export default {
       }
     },
     modify(item) {
-      if (item.parentTaskId) {
-        this.$router.push({name: 'modifyMultiTask', params: {parentTaskId: item.parentTaskId}})
-      } else {
-        this.$router.push({name: 'modifyTask', params: {taskId: item.id}})
-      }
-    },
-    expand(item) {
-      if (this.expandedItem === item) {
-        this.expandedItem = undefined
-      } else {
-        this.expandedItem = item
-      }
+      this.$router.push({name: 'modifyTask', params: {taskId: item.id}})
     },
     subDay() {
       this.day = subDays(this.day, 1)
@@ -226,9 +213,6 @@ export default {
   align-items: flex-start;
   justify-content: stretch;
   width: 100vw;
-  &.expanded {
-    box-shadow: 0 0 5px var(--bg-dark);
-  }
   .list-item-task {
     display: flex;
     align-items: center;

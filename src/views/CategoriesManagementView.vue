@@ -6,7 +6,6 @@
       <div
         v-for="category in categories"
         class="list-item"
-        :class="{expanded: expandedItem === category}"
         :key="category.id"
         :style="{'--color': category.color}"
       >
@@ -14,7 +13,7 @@
           <span class="material-symbols-outlined">label</span>
           <div class="task-name" @click="expand(category)">{{category.name}}</div>
         </div>
-        <div v-if="expandedItem === category" class="list-item-actions">
+        <div class="list-item-actions">
           <div class="material-symbols-outlined" @click="remove(category)">delete</div>
         </div>
       </div>
@@ -24,25 +23,16 @@
 
 <script>
 import { store } from '@/store/store.js'
-import { notificationStore } from '@/store/notificationStore.js'
 
 export default {
   data() {
     return {
-      categories: store.categories,
-      expandedItem: undefined
+      categories: store.categories
     }
   },
   methods: {
     remove(category) {
       store.removeCategory(category.id)
-    },
-    expand(item) {
-      if (this.expandedItem === item) {
-        this.expandedItem = undefined
-      } else {
-        this.expandedItem = item
-      }
     }
   }
 }
@@ -67,9 +57,6 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   width: 100vw;
-  &.expanded {
-    box-shadow: 0 0 5px var(--bg-dark);
-  }
   .list-item-actions {
     display: flex;
     justify-content: flex-start;

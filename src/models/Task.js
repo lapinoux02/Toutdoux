@@ -9,7 +9,7 @@ const nthMonthDay = (date, nth, day) => {
 const isAfterOrSame = (date1, date2) => isAfter(date1, date2) || isSameDay(date1, date2)
 
 class Task {
-	constructor({task, categoryId, date, endDate, report, taskType, groupId}) {
+	constructor({task, categoryId, date, endDate, report, taskType}) {
 		if (!task) throw new Error('task must be defined')
 
 		this.id = v4()
@@ -19,7 +19,6 @@ class Task {
 		this.endDate = endDate && newDate(endDate)
 		this.report = report
 		this.taskType = taskType
-		this.groupId = groupId // MultiTasks: Multitasks are a group of tasks that have the same groupId. Obsolete
 	}
 
 	display() {

@@ -15,7 +15,6 @@
       <div
         v-for="item in showedItems"
         class="list-item"
-        :class="{expanded: expandedItem === item}"
         :key="item.id"
         :style="{'--color': categories.find(cat => cat.id === item.categoryId)?.color || 'var(--text-color)'}"
       >
@@ -23,7 +22,7 @@
           <span class="material-symbols-outlined">{{ itemSymbol(item) }}</span>
           <div class="task-name" @click="expand(item)">{{item.task}}</div>
         </div>
-        <div v-if="expandedItem === item" class="list-item-actions">
+        <div class="list-item-actions">
           <div class="material-symbols-outlined" @click="remove(item)">delete</div>
           <div class="material-symbols-outlined" @click="modify(item)">edit</div>
         </div>
@@ -42,8 +41,7 @@ export default {
       day: new Date(),
       categories: store.categories,
       draggedItem: undefined,
-      selectedCategory: undefined,
-      expandedItem: undefined
+      selectedCategory: undefined
     }
   },
   computed: {
@@ -87,18 +85,7 @@ export default {
       }
     },
     modify(item) {
-      if (item.parentTaskId) {
-        this.$router.push({name: 'modifyMultiTask', params: {parentTaskId: item.parentTaskId}})
-      } else {
-        this.$router.push({name: 'modifyTask', params: {taskId: item.id}})
-      }
-    },
-    expand(item) {
-      if (this.expandedItem === item) {
-        this.expandedItem = undefined
-      } else {
-        this.expandedItem = item
-      }
+      this.$router.push({name: 'modifyTask', params: {taskId: item.id}})
     }
   }
 }
@@ -144,9 +131,6 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   width: 100vw;
-  &.expanded {
-    box-shadow: 0 0 5px var(--bg-dark);
-  }
   .list-item-actions {
     display: flex;
     justify-content: flex-start;
